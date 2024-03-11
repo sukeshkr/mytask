@@ -20,10 +20,10 @@ class DatabaseSeeder extends Seeder
 
         //create admin
         User::updateOrCreate(
-            ['email' => 'admin@gmail.com'],
-            ['name' => 'Administrator', 'password' => 'admin@123', 'phone' => '0123456789', 'status' => 1]
+            ['email' => 'admin@admin.com'],
+            ['name' => 'Administrator', 'password' => 'password', 'phone' => '0123456789', 'status' => 1]
         );
 
-        $user = User::where('email', 'admin@gmail.com')->first();
+        $user = User::where('email', 'admin@admin.com')->first();
     }
 }

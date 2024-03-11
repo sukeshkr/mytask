@@ -7,34 +7,52 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Modules\Admin\Entities\Employee;
 
 class ApiController extends Controller
 {
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            $token = $user->createToken('auth_token')->plainTextToken;
+        if ($validator->fails()) {
+            $res = [
+                'errorcode' => 3,
+                'message' => $validator->errors()->all(),
+            ];
+        } else {
 
-            $data['user_id'] = $user->id;
-            $data['token_type'] = 'bearer';
-            $data['token'] = $token;
+            $credentials = $request->only('email', 'password');
+
+            if (Auth::attempt($credentials)) {
+                $user = Auth::user();
+                $token = $user->createToken('auth_token')->plainTextToken;
+
+                $data['user_id'] = $user->id;
+                $data['token_type'] = 'bearer';
+                $data['token'] = $token;
+
+                $res = [
+                    'errorcode' => 0,
+                    'data' => $data,
+                    'message' => 'Success!',
+                    'status' => 200,
+                ];
+
+                return response()->json($res);
+            }
 
             $res = [
-                'errorcode' => 0,
-                'data' => $data,
-                'message' => 'Success!',
-                'status' => 200,
+                'errorcode' => 1,
+                'message' => 'Unauthorized!',
+                'status' => 401,
             ];
-
-            return response()->json($res);
         }
-
-
-        return response()->json(['message' => 'Unauthorized'], 401);
+        return response()->json($res);
     }
 
     public function userIndex(Request $request)
